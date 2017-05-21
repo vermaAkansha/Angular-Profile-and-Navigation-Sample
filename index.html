@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html ng-app="demo">
+	<head>
+		<!-- <meta name="viewport" content="width=device-width" /> -->
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, target-densitydpi=device-dpi, minimal-ui" />
+		<meta charset="utf-8"/>
+		
+		<!-- STYLES and CSS -->
+		<style type="text/less">
+			.transition (@value1,@value2:X,...) { @value: ~`"@{arguments}".replace(/[\[\]]|\,\sX/g, '')`; -webkit-transition: @value; -moz-transition: @value; -ms-transition: @value; -o-transition: @value; transition: @value; }
+			.transform (@value1,@value2:X,...) { @value: ~`"@{arguments}".replace(/[\[\]]|\,\sX/g, '')`; transform:@value; -ms-transform:@value; -webkit-transform:@value; -o-transform:@value; -moz-transform:@value; }
+            .border-box { box-sizing:border-box; -moz-box-sizing:border-box; }
+			
+			body { font-family:Arial; font-size:14px; }
+			body>span, body>h1 { float:left; width:100%; margin:0; padding:0; margin-bottom:10px; }
+			
+			span { color:##ffffff; }
+			button { width:auto; padding:7px 22px; }
+            
+            menu { display:block;
+                @menu-width:250px;
+                >div { position:absolute; z-index:2; top:0;  width:@menu-width; height:100%; .border-box; .transition(-webkit-transform ease 250ms); .transition(transform ease 250ms);
+                    &.left { background:#ffffff; left:@menu-width*-1; }
+                    &.show.left { .transform(translate3d(@menu-width, 0, 0)); }
+                    
+                    &.right { background:#6B1919; right:@menu-width*-1; }
+                    &.show.right { .transform(translate3d(@menu-width*-1, 0, 0)); }
+                    
+                    >menu-item { display:block;
+                        >div { float:left; width:100%; margin:0; padding:10px 15px; border-bottom:solid 1px #555; cursor:pointer; .border-box; color:#e82d38; font:bold 1.5em Quadranta;
+                            &:hover {color:#ffffff; background:#ffffff; }
+                            >span { float:left; color:inherit; }
+                        }
+                    }
+                }
+            }
+		</style>
+		<style type="text/css">
+			body, html{
+				height: 100%;
+			}
+		
+			#map {
+				height: 15em;
+			  }
+			  
+			.my-controller {
+			  border: 1px solid #fcc;
+			  padding: 5px;
+			  //margin: 3px;
+			}
+			.my-controller small {
+			  color: #c99;
+			}
+			  
+			.toggle-menu {
+			  display: block;
+			  width: 2em;
+			  height: 2.5em;
+			  background: url("images/menu-normal.png") no-repeat;
+			  background-size: 100% 100%;
+			  margin-left: 0.5em;
+			}
+			
+			.Material-Container{
+					margin:1px 0 0 0;
+				    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+					box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+			}
+			
+			.Material-Container1{
+					margin:1px 0 0 0;
+					//background: linear-gradient(to right, #e82d38 50% ,white 50%, #e82d38 50.9%);
+					border: 1px solid #fcc;	
+				    -webkit-box-shadow: 2px 1px 2px rgba(0,0,0,0.3);
+					box-shadow: 2px 2px 1px 2px rgba(0,0,0,0.3);
+			}
+			
+			.clsCardView{						
+				position:relative;	
+			}
+			
+			.clsImg{
+				width:100%; 
+				height: 10em;
+				border: 1px solid #fcc;				
+				margin-top: 1px; 				
+				-webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+				box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+			}
+			
+			.clsCover{
+				position: absolute;
+				margin-top: 1px; 
+				top: 0;
+				width:100%;
+				height: 10em;
+				background-color:#000000;
+				opacity: 0.6;
+				filter: alpha(opacity=60);
+			}
+			
+			.center {
+				position: absolute;
+				left: 0;
+				top: 30%;
+				width: 100%;
+				text-align: center;
+				font-size: 18px;
+				font:normal 1.4em Quadranta;color:#ffffff;
+			}
+			
+			.smallFont{
+				text-align: center;
+				font:normal 1em Quadranta;color:#3C3E2B;
+			}
+			
+			.bigFont{
+				text-align: center;
+				font:normal 1.4em Quadranta;color:#3C3E2B;
+			}
+			
+			#cloud-dynamic { width: 100%; height: 400px; }
+			  
+			@font-face {
+			font-family: 'Quadranta';
+			font-style: normal;
+			font-weight: normal;
+			src: local('Quadranta'), url('css/fonts/Quadranta-Regular.woff') format('woff');
+			}
+
+
+			@font-face {
+			font-family: 'Quadranta Bold';
+			font-style: normal;
+			font-weight: normal;
+			src: local('Quadranta Bold'), url('css/fonts/Quadranta-Bold.woff') format('woff');
+			}
+
+		</style>
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/jqcloud.min.css">
+
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="css/bootstrap-theme.min.css">
+		
+		<!-- SCRIPTS -->
+		<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.js"></script>
+		<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/less.js/1.7.5/less.min.js"></script>
+		<script type="text/javascript" src="js/dirPagination.js"></script>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/angular-material-icons/0.7.0/angular-material-icons.min.js"></script>		
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.5/angular-route.min.js"></script>
+		<script src="js/angular-d3.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<!-- <script src="js/jqcloud.min.js"></script>
+		<script src="js/angular-jqcloud.js"></script> -->
+	
+		<script type="text/javascript">
+			var map;
+      /* function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -34.397, lng: 150.644},
+          zoom: 8
+        });
+		
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(function(position) {
+				var pos = {
+					lat: position.coords.latitude,
+					lng: position.coords.longitude
+				};
+				map.setCenter(pos);
+			});
+			 
+		}
+
+		console.log(map);
+      } */
+	  
+	angular.module("demo", ['angularUtils.directives.dirPagination','ngMdIcons','d3','ngRoute']).config(['$routeProvider',function ($routeProvider) {
+    $routeProvider
+      .when('#/', {
+            // Using template to enable using example without server, templateURL require Ajax call
+        template: '' +
+            '<wordcloud words="words" width="350" height="150" font-size="50" class="one"></wordcloud>'+
+			'',
+        controller: 'modalDemo'
+      })
+      .otherwise({
+        redirectTo: '/'
+      });
+  }])
+  .run(function($rootScope) {
+		document.addEventListener("keyup", function(e) {
+			if (e.keyCode === 27)
+				$rootScope.$broadcast("escapePressed", e.target);
+		});
+		
+		document.addEventListener("click", function(e) {
+			$rootScope.$broadcast("documentClicked", e.target);
+		});
+	})
+	.directive("menu", function() {
+		return {
+			restrict: "E",
+			template: "<div ng-class='{ show: visible, left: alignment === \"left\", right: alignment === \"right\" }' ng-transclude></div>",
+			transclude: true,
+			scope: {
+				visible: "=",
+				alignment: "@"
+			}
+		};
+	})
+    .directive("menuItem", function() {
+		 return {
+			 restrict: "E",
+			 template: "<div ng-click='navigate()' ng-transclude></div>",
+			 transclude: true,
+			 scope: {
+				 hash: "@"
+			 },
+			 link: function($scope) {
+				 $scope.navigate = function() {
+					console.log($scope);
+					var ref = $scope;
+					window.sendHttpReq($scope.hash);
+					document.getElementById('abc').style.overflow = "auto";
+					 window.location.hash = $scope.hash;
+					 document.getElementById('abc').style.overflow = "none";
+					 
+				 }
+			 }
+		 }
+	});
+			
+	  
+		</script>
+		<script type="text/javascript" src="scripts/controllers/ModalDemoCtrl.js"></script>
+		<!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWKJ6AcrGjMusoxt41sCNdChBsHfFEsR8&callback=initMap"
+    async defer></script> -->
+	</head>
+	<body ng-controller="modalDemo" style="height:100%; overflow:none;">		
+		
+		<menu visible="leftVisible" alignment="left">
+            <menu-item hash="home">Home</menu-item>
+            <menu-item hash="profile">Profile</menu-item>
+            <menu-item hash="third-page">Booking History</menu-item>
+			<menu-item hash="first-page">News</menu-item>
+            <menu-item hash="second-page">Messages</menu-item>
+            <menu-item hash="third-page">Support</menu-item>
+			<menu-item hash="third-page">About</menu-item>
+        </menu>   
+		
+		<div style="width:100%;height:100%; overflow: none;">
+			<div style="width:100%; height:6%; background-color: white; margin:0.2em 0 0 0;" class="Material-Container">
+				<div style="float:left;width:50%;">
+					<a href="#" style="float:left;" class="toggle-menu" ng-click="showLeft($event)"></a>	
+					<span style="font:bold 1.6em Quadranta;color:#e82d38;margin:0 0 0 0.5em;">Choose Gigs</span>
+				</div>
+				<div style="float:right;width:50%;">
+					<ng-md-icon icon="search" style="fill:#e82d38;float:right;"></ng-md-icon>		
+				</div>
+			</div>
+			
+			<!-- <div id="map" style="margin:1px 0 0 0;"></div> -->
+		
+			<div id="abc" style="width: 100%; height:97%; margin: 0.2em 0 0 0; overflow: none;">
+			  <div class="container">
+				<div class="row" id="home">
+				  <!-- <div class="col-lg-8">
+					<div class="my-controller"> -->
+
+					 <!-- <div class="row">
+						<div class="col-xs-4">
+						  <h3>Events - {{ currentPage }}</h3>
+						</div>
+						<div class="col-xs-4">
+						  <label for="search">Search:</label>
+						  <input ng-model="q" id="search" class="form-control" placeholder="Filter text">
+						</div>
+						<div class="col-xs-4">
+						  <label for="search">items per page:</label>
+						  <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+						</div>
+					  </div> <br> -->
+					  
+					  <div>
+						<div>					   
+						  <div class="clsCardView" dir-paginate="event in tabData | filter:q | itemsPerPage: pageSize" current-page="currentPage">
+													
+							<img src="images/lynn.jpg" class="clsImg"></img>
+							<div class="clsCover"></div>
+							<div class="center">
+								{{ event.venue }} <br>				
+								{{ event.date }} 
+								<ng-md-icon icon="fiber_manual_record" style="fill:#ffffff; align:right;"></ng-md-icon>
+								{{event.city}}
+								<ng-md-icon icon="fiber_manual_record" style="fill:#ffffff; align:right;"></ng-md-icon>
+								{{event.budget}} <br>						
+								<div>
+									<ng-md-icon icon="stars" style="fill:#ffffff; align:right;" ng-repeat="i in range.slice(0,event.rating) track by $index">
+									</ng-md-icon>
+								</div>
+							</div>
+							
+						  </div>
+						  
+						</div>
+					  </div>
+				</div>
+			  </div>
+			</div>
+			
+		<div id="profile" style="width:100%;height:100%;background-color:00ff00;">
+			<div style="width:100%; height:6%; background-color: white;" class="Material-Container">			
+				<a href="#" style="float:left;" class="toggle-menu" ng-click="showLeft($event)"></a>	
+				<span style="font:bold 1.6em Quadranta;color:#e82d38; margin:0 0 0 0.5em;">Profile</span>
+			</div>	
+			<div class="clsImg">								
+				<!-- <jqcloud words="words" height="140" width="300" steps="4" shape="rectangular" font-size="{from:0.09, to:0.04}" center="{x: 0.5, y:10}"></jqcloud> -->
+				
+				<!-- With JS Array inside of an Controller -->
+				<wordcloud words="words" width="350" height="150" font-size="50" class="one"></wordcloud>
+				<div class="container" ng-view></div>
+			</div>
+			<img src="images/profile.jpg" class="clsImg" style="height:10em;width:40%;border-radius:50%;margin:-20% 30%;"></img>
+
+			<ng-md-icon icon="date_range" style="fill:#3C3E2B;float:left;margin:-1% 0 0 10%;"></ng-md-icon>		
+			<ng-md-icon icon="edit" style="fill:#3C3E2B;float:right;margin:-1% 15% 0 0;"></ng-md-icon>		
+			
+			<div style="width:100%;height:18%; margin-top:10%; background-color: white;" class="Material-Container1">
+			
+				<div id="galleryPanel" style="width:100%; height: 10%;">
+					<div style="width:49%;float:left;border:0.5px white solid;text-align:center;font:bold 3em Quadranta;color:#e82d38;">
+						<span>3</span>
+						<br>
+						<span>Photos</span>
+					</div>
+					<!-- <div style="width:2%;height:8%;background-color:#e82d38;border-radius:1px;"></div> -->
+					<div style="width:49%;float:right;border:0.5px white solid;text-align:center;font:bold 3em Quadranta;color:#e82d38;">
+						<div style="width:1px;height:1.5em;background-color:#fcc;border-radius:1px;float:left;margin-top:0.8em;"></div>
+						<div
+							<span>1</span>
+							<br>
+							<span>Videos</span>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			
+			<div style="width:100%;height:129%; margin-top:2%; background-color: white;" class="Material-Container1">
+			
+				<div dir-paginate="profileData in tabData| filter:q | itemsPerPage: pageSize" current-page="currentPage" style="width:100%; height:10em;">	
+					<div dir-paginate="reviews in profileData.pf_reviews| filter:q | itemsPerPage: pageSize" current-page="currentPage">
+						<div style="border-bottom:0.5px #fcc solid;padding:1em;">							
+							<ng-md-icon icon="stars" style="fill:#3C3E2B; align:right;" ng-repeat="i in range.slice(0,reviews.pf_review_stars) track by $index">
+							</ng-md-icon>
+							<br>
+							<span class="bigFont"><b><i>{{reviews.pf_review_title}}<span>
+							<br>
+							<span class="smallFont"><blockquote>{{reviews.pf_review_content}}</span>
+							<br>
+							<span class="smallFont"> <b>-</b> {{reviews.pf_review_name}}</span></blockquote>
+							
+						</div>
+					</div>
+				</div>
+			
+			</div>
+						
+		</div>
+		</div>
+	   </div>	
+	  </div>	
+	  
+	</body>
+</html>
